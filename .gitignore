@@ -57,3 +57,8 @@ typings/
 # dotenv environment variables file
 .env
 
+__tmp
+
+*.swp
+*.swn
+*.DS_Store

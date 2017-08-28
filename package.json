@@ -1,0 +1,32 @@
+{
+  "name": "kabanery-lumine-view-debug-tool",
+  "version": "0.0.1",
+  "description": "kabanery lumine view debug tool",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha test/**/*.js"
+  },
+  "bin": {
+    "debugview": "./bin/debugview"
+  },
+  "keywords": [
+    "kabanery",
+    "lumine",
+    "view",
+    "debug",
+    "tool"
+  ],
+  "author": "ddchen",
+  "license": "MIT",
+  "dependencies": {
+    "crude-server": "0.0.7",
+    "del": "^3.0.0",
+    "es6-promisify": "^5.0.0",
+    "kabanery": "^0.2.7",
+    "kabanery-lumine": "0.0.21",
+    "kabanery-spa": "0.0.16",
+    "uuid": "^3.1.0",
+    "webpack": "^3.5.5",
+    "yargs": "^8.0.2"
+  }
+}

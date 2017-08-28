@@ -1,0 +1,20 @@
+#!/usr/bin/env node
+
+let yargs = require('yargs');
+let {
+    startServer
+} = require('..');
+
+const help = `Usage: debugview
+    --port [port]`;
+
+yargs.usage(help).demandOption([]).help('h').alias('h', 'help');
+
+let {
+    argv
+} = yargs;
+
+startServer(argv.port).catch(err => {
+    console.log(err); //eslint-disable-line
+    throw err;
+});
