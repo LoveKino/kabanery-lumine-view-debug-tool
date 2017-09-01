@@ -60,7 +60,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 25);
+/******/ 	return __webpack_require__(__webpack_require__.s = 26);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -304,7 +304,7 @@ let iterate = __webpack_require__(17);
 
 let {
     map, reduce, find, findIndex, forEach, filter, any, exist, compact
-} = __webpack_require__(31);
+} = __webpack_require__(32);
 
 let contain = (list, item, fopts) => findIndex(list, item, fopts) !== -1;
 
@@ -410,14 +410,14 @@ let {
     view
 } = __webpack_require__(6);
 
-let steadyTheme = __webpack_require__(62);
+let steadyTheme = __webpack_require__(63);
 
 let {
     deepMergeMap,
     resolveFnValue
 } = __webpack_require__(3);
 
-let ClassTable = __webpack_require__(63);
+let ClassTable = __webpack_require__(64);
 
 let {
     Signal
@@ -803,7 +803,7 @@ module.exports = {
 "use strict";
 
 
-module.exports = __webpack_require__(46);
+module.exports = __webpack_require__(47);
 
 /**
  * @readme-doc
@@ -948,9 +948,9 @@ module.exports = (...args) => {
 "use strict";
 
 
-let shadowFrame = __webpack_require__(28);
+let shadowFrame = __webpack_require__(29);
 
-let startMomenter = __webpack_require__(29);
+let startMomenter = __webpack_require__(30);
 
 let getX = (elem) => {
     var x = 0;
@@ -1046,7 +1046,7 @@ let {
     isObject, isNode
 } = __webpack_require__(0);
 
-let parseArgs = __webpack_require__(32);
+let parseArgs = __webpack_require__(33);
 
 let parseStyle = __webpack_require__(18);
 
@@ -1158,7 +1158,7 @@ module.exports = {
 
 let {
     createElement, createSvgElement
-} = __webpack_require__(40);
+} = __webpack_require__(41);
 
 let {
     bindEvents
@@ -1198,7 +1198,7 @@ module.exports = reduceNode;
 "use strict";
 
 
-let EventMatrix = __webpack_require__(41);
+let EventMatrix = __webpack_require__(42);
 
 let {
     listenEventType,
@@ -1236,7 +1236,7 @@ let {
     isObject, isNode
 } = __webpack_require__(0);
 
-let parseArgs = __webpack_require__(47);
+let parseArgs = __webpack_require__(48);
 
 let parseStyle = __webpack_require__(21);
 
@@ -1346,7 +1346,7 @@ module.exports = {
 "use strict";
 
 
-let uuidv4 = __webpack_require__(54);
+let uuidv4 = __webpack_require__(55);
 
 let seed = uuidv4();
 
@@ -1366,7 +1366,7 @@ module.exports = {
 
 let {
     createElement, createSvgElement
-} = __webpack_require__(59);
+} = __webpack_require__(60);
 
 let {
     bindEvents
@@ -1406,7 +1406,7 @@ module.exports = reduceNode;
 "use strict";
 
 
-let EventMatrix = __webpack_require__(60);
+let EventMatrix = __webpack_require__(61);
 
 let {
     eventMapHook
@@ -1443,7 +1443,7 @@ module.exports = {
 "use strict";
 
 
-module.exports = __webpack_require__(30);
+module.exports = __webpack_require__(31);
 
 /**
  * @readme-doc
@@ -1775,8 +1775,8 @@ let getDoc = (node) => {
 "use strict";
 
 
-exports.decode = exports.parse = __webpack_require__(43);
-exports.encode = exports.stringify = __webpack_require__(44);
+exports.decode = exports.parse = __webpack_require__(44);
+exports.encode = exports.stringify = __webpack_require__(45);
 
 
 /***/ }),
@@ -1940,14 +1940,55 @@ module.exports = {
 "use strict";
 
 
-let spa = __webpack_require__(26);
+let requestor = (apiPath = '/api/pfc') => (pfcCode) => {
+    return new Promise((resolve, reject) => {
+        let xhr = new XMLHttpRequest();
+
+        xhr.onreadystatechange = () => {
+            if (xhr.readyState === XMLHttpRequest.DONE) {
+                if (xhr.status === 200) {
+                    let {
+                        errno,
+                        errMsg,
+                        data
+                    } = JSON.parse(xhr.responseText);
+                    if (errno === 0) {
+                        resolve(data);
+                    } else {
+                        reject(new Error((errMsg.split(':')[1] || '').trim()));
+                    }
+                } else {
+                    reject(new Error(`status code is ${xhr.status}`));
+                }
+            }
+        };
+
+        xhr.open('post', apiPath);
+        xhr.send(pfcCode);
+    });
+};
+
+module.exports = requestor;
+
+
+/***/ }),
+/* 26 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+let spa = __webpack_require__(27);
 let {
     n,
     mount
 } = __webpack_require__(16);
 
-let debugPage = __webpack_require__(45);
-let pfcRequestor = __webpack_require__(79);
+let debugPage = __webpack_require__(46);
+let {
+    apiMap,
+    runApi
+} = __webpack_require__(80);
 
 let {
     router,
@@ -1958,26 +1999,33 @@ mount(n('div id="pager"'), document.body); // pager as contauner
 
 let {
     forward
-} = router(queryPager({
-    'debugPage': {
-        title: 'debug veiw',
-        render: debugPage
+} = router(
+    // pages
+    queryPager({
+        'debugPage': {
+            title: 'debug veiw',
+            render: debugPage
+        }
+    }, 'debugPage'),
+
+    // page env
+    {
+        apiMap,
+        runApi
     }
-}, 'debugPage'), {
-    pfcRequest: pfcRequestor()
-});
+);
 
 forward(window.location.href);
 
 
 /***/ }),
-/* 26 */
+/* 27 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-module.exports = __webpack_require__(27);
+module.exports = __webpack_require__(28);
 
 /**
  * @readme-quick-run
@@ -2014,7 +2062,7 @@ module.exports = __webpack_require__(27);
 
 
 /***/ }),
-/* 27 */
+/* 28 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2210,7 +2258,7 @@ module.exports = {
 
 
 /***/ }),
-/* 28 */
+/* 29 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2265,7 +2313,7 @@ module.exports = shadowFrame;
 
 
 /***/ }),
-/* 29 */
+/* 30 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2321,7 +2369,7 @@ module.exports = startMomenter;
 
 
 /***/ }),
-/* 30 */
+/* 31 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2331,13 +2379,13 @@ let {
     n, svgn, bindPlugs, toHTML, parseArgs, isKabaneryNode, cn, parseStyle
 } = __webpack_require__(9);
 
-let plugs = __webpack_require__(34);
+let plugs = __webpack_require__(35);
 
-let view = __webpack_require__(37);
+let view = __webpack_require__(38);
 
 let mount = __webpack_require__(19);
 
-let N = __webpack_require__(42);
+let N = __webpack_require__(43);
 
 let reduceNode = __webpack_require__(10);
 
@@ -2363,7 +2411,7 @@ module.exports = {
 
 
 /***/ }),
-/* 31 */
+/* 32 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2468,13 +2516,13 @@ module.exports = {
 
 
 /***/ }),
-/* 32 */
+/* 33 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-let parseAttribute = __webpack_require__(33);
+let parseAttribute = __webpack_require__(34);
 
 let {
     isString, isObject, isNode, likeArray, isNumber, isBool
@@ -2554,7 +2602,7 @@ module.exports = parseArgs;
 
 
 /***/ }),
-/* 33 */
+/* 34 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2626,14 +2674,14 @@ module.exports = parseAttribute;
 
 
 /***/ }),
-/* 34 */
+/* 35 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-let twowaybinding = __webpack_require__(35);
-let eventError = __webpack_require__(36);
+let twowaybinding = __webpack_require__(36);
+let eventError = __webpack_require__(37);
 
 module.exports = {
     twowaybinding,
@@ -2642,7 +2690,7 @@ module.exports = {
 
 
 /***/ }),
-/* 35 */
+/* 36 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2669,7 +2717,7 @@ module.exports = (obj, path) => (tagName, attributes, childExp) => {
 
 
 /***/ }),
-/* 36 */
+/* 37 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2701,7 +2749,7 @@ let wrapEventHandler = (fun, catcher) => {
 
 
 /***/ }),
-/* 37 */
+/* 38 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2721,7 +2769,7 @@ let {
     forEach
 } = __webpack_require__(1);
 
-let replace = __webpack_require__(38);
+let replace = __webpack_require__(39);
 
 let reduceNode = __webpack_require__(10);
 
@@ -2920,7 +2968,7 @@ module.exports = View;
 
 
 /***/ }),
-/* 38 */
+/* 39 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2938,7 +2986,7 @@ let {
     forEach
 } = __webpack_require__(1);
 
-let applyAttibutes = __webpack_require__(39);
+let applyAttibutes = __webpack_require__(40);
 
 let replaceDirectly = (node, newNode) => {
     let parent = node.parentNode;
@@ -3052,7 +3100,7 @@ module.exports = (node, newNode) => {
 
 
 /***/ }),
-/* 39 */
+/* 40 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3099,7 +3147,7 @@ module.exports = applyAttibutes;
 
 
 /***/ }),
-/* 40 */
+/* 41 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3146,7 +3194,7 @@ module.exports = {
 
 
 /***/ }),
-/* 41 */
+/* 42 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3273,7 +3321,7 @@ let getGlobalEventTypeId = (type) => `__event_type_id_${type}`;
 
 
 /***/ }),
-/* 42 */
+/* 43 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3329,7 +3377,7 @@ module.exports = (...args) => {
 
 
 /***/ }),
-/* 43 */
+/* 44 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3420,7 +3468,7 @@ var isArray = Array.isArray || function (xs) {
 
 
 /***/ }),
-/* 44 */
+/* 45 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3512,7 +3560,7 @@ var objectKeys = Object.keys || function (obj) {
 
 
 /***/ }),
-/* 45 */
+/* 46 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3522,28 +3570,29 @@ let lumineView = __webpack_require__(2);
 let n = __webpack_require__(7);
 let {
     syncBindWithKeyMap
-} = __webpack_require__(64);
+} = __webpack_require__(65);
 let {
     deliver,
     onSignalType
 } = __webpack_require__(4);
 let {
     loadingNoticeProgress
-} = __webpack_require__(65);
+} = __webpack_require__(66);
 let {
     wrapPagePropsWithStore
-} = __webpack_require__(67);
+} = __webpack_require__(68);
 
-let Vn = __webpack_require__(68);
-let Hn = __webpack_require__(69);
-let Input = __webpack_require__(70);
-let Textarea = __webpack_require__(71);
-let Button = __webpack_require__(72);
-let PageLoading = __webpack_require__(73);
-let Notice = __webpack_require__(78);
+let Vn = __webpack_require__(69);
+let Hn = __webpack_require__(70);
+let Input = __webpack_require__(71);
+let Textarea = __webpack_require__(72);
+let Button = __webpack_require__(73);
+let PageLoading = __webpack_require__(74);
+let Notice = __webpack_require__(79);
 
 const ACTIONS = {
-    DO_LOAD_VIEW_FILE: 'doLoadViewFile'
+    DO_LOAD_VIEW_FILE: 'doLoadViewFile',
+    DO_SAVE_CASE: 'doSaveCase'
 };
 
 // TODO fix multiple update problem
@@ -3557,10 +3606,12 @@ let PageView = lumineView(({
             testViewErr = null;
 
         try {
-            if (clear) {
-                clear();
+            if (props.viewDefinitionCode) {
+                if (clear) {
+                    clear();
+                }
+                testView = eval(`${props.viewDefinitionCode};clear = clearEvents;${props.viewDebugCode}`);
             }
-            testView = eval(`${props.viewDefinitionCode};clear = clearEvents;${props.viewDebugCode}`);
         } catch (err) {
             testViewErr = err.toString();
         }
@@ -3598,18 +3649,27 @@ let PageView = lumineView(({
             ]),
 
             n(Hn, {
-                mode: 'percentage'
+                mode: 'percentage',
+                pers: [1, 4, 4]
             }, [
-                n(Textarea, syncBindWithKeyMap(ctx, {
-                    'viewDebugCode': 'value'
-                }, {
-                    autoUpdate: true,
-                    bindedProps: {
-                        style: {
-                            width: '100%'
+                n('div', 'case list'),
+
+                n(Vn, [
+                    n(Textarea, syncBindWithKeyMap(ctx, {
+                        'viewDebugCode': 'value'
+                    }, {
+                        autoUpdate: true,
+                        bindedProps: {
+                            style: {
+                                width: '100%'
+                            }
                         }
-                    }
-                })),
+                    })),
+
+                    n(Button, {
+                        onsignal: onSignalType('click', deliver(ctx, ACTIONS.DO_SAVE_CASE))
+                    }, 'save as case')
+                ]),
 
                 n('div', [
                     testViewErr || testView
@@ -3630,14 +3690,25 @@ let PageView = lumineView(({
 });
 
 module.exports = ({
-    pfcRequest
+    apiMap,
+    runApi
 }) => {
     let pageView = n(PageView, wrapPagePropsWithStore({
         onsignal: (signal, data, ctx) => {
             if (signal.type === ACTIONS.DO_LOAD_VIEW_FILE) {
+                loadViewFileHandler(ctx);
+            } else if (signal.type === ACTIONS.DO_SAVE_CASE) {
                 if (data.props.viewPath) {
-                    // do load view file
-                    loadViewFileHandler(data.props.viewPath);
+                    if (data.props.testPath) {
+                        //
+                        saveCaseHandler(ctx);
+                    } else {
+                        // notice
+                        ctx.update([
+                            ['props.showNotice', true],
+                            ['props.noticeText', 'empty test path!']
+                        ]);
+                    }
                 } else {
                     // notice
                     ctx.update([
@@ -3651,14 +3722,26 @@ module.exports = ({
         blackList: ['showLoading', 'viewDefinitionCode', 'showNotice', 'noticeText', 'theme']
     }));
 
-    let loadViewFileHandler = loadingNoticeProgress((viewPath) => {
-        let props = pageView.ctx.getData().props;
+    let loadingPromise = (fn) => {
+        return loadingNoticeProgress(fn, pageView.ctx, 'props.showLoading', 'props.showNotice', 'props.noticeText');
+    };
+
+    let saveCaseHandler = loadingPromise((ctx) => {
+        let props = ctx.getData().props;
+        let viewPath = props.viewPath;
+        let testPath = props.testPath;
+        return runApi(apiMap.addCase(viewPath, testPath));
+    });
+
+    let loadViewFileHandler = loadingPromise((ctx) => {
+        let props = ctx.getData().props;
+        let viewPath = props.viewPath;
         let testPath = props.testPath;
         if (!testPath) {
             testPath = getDefaultTestDir(viewPath);
         }
 
-        return pfcRequest(`loadViewFile("${viewPath}")`).then((data) => {
+        return runApi(apiMap.loadViewFile(viewPath)).then((data) => {
             let viewDefinitionCode = `let {TestedView, clearEvents} = ${data.viewCode}`;
             let viewDebugCode = props.viewDebugCode;
             if (viewDebugCode === null) {
@@ -3675,7 +3758,7 @@ module.exports = ({
 
     // loading data at first
     if (pageView.ctx.getData().props.viewPath) {
-        loadViewFileHandler(pageView.ctx.getData().props.viewPath);
+        loadViewFileHandler(pageView.ctx);
     }
 
     return pageView;
@@ -3683,14 +3766,15 @@ module.exports = ({
 
 let getDefaultTestDir = (jsPath) => {
     let parts = jsPath.split('/');
-    parts.pop();
+    let name = parts.pop();
     parts.push('__test__');
+    parts.push(name);
     return parts.join('/');
 };
 
 
 /***/ }),
-/* 46 */
+/* 47 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3707,13 +3791,13 @@ let {
     parseStyle
 } = __webpack_require__(12);
 
-let plugs = __webpack_require__(49);
+let plugs = __webpack_require__(50);
 
-let view = __webpack_require__(52);
+let view = __webpack_require__(53);
 
 let mount = __webpack_require__(22);
 
-let N = __webpack_require__(61);
+let N = __webpack_require__(62);
 
 let reduceNode = __webpack_require__(14);
 
@@ -3743,13 +3827,13 @@ module.exports = {
 
 
 /***/ }),
-/* 47 */
+/* 48 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-let parseAttribute = __webpack_require__(48);
+let parseAttribute = __webpack_require__(49);
 
 let {
     isString,
@@ -3840,7 +3924,7 @@ module.exports = parseArgs;
 
 
 /***/ }),
-/* 48 */
+/* 49 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3914,14 +3998,14 @@ module.exports = parseAttribute;
 
 
 /***/ }),
-/* 49 */
+/* 50 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-let twowaybinding = __webpack_require__(50);
-let eventError = __webpack_require__(51);
+let twowaybinding = __webpack_require__(51);
+let eventError = __webpack_require__(52);
 
 module.exports = {
     twowaybinding,
@@ -3930,7 +4014,7 @@ module.exports = {
 
 
 /***/ }),
-/* 50 */
+/* 51 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3957,7 +4041,7 @@ module.exports = (obj, path) => (tagName, attributes, childExp) => {
 
 
 /***/ }),
-/* 51 */
+/* 52 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3989,7 +4073,7 @@ let wrapEventHandler = (fun, catcher) => {
 
 
 /***/ }),
-/* 52 */
+/* 53 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4009,7 +4093,7 @@ let {
     forEach
 } = __webpack_require__(1);
 
-let replace = __webpack_require__(53);
+let replace = __webpack_require__(54);
 
 let reduceNode = __webpack_require__(14);
 
@@ -4208,7 +4292,7 @@ module.exports = View;
 
 
 /***/ }),
-/* 53 */
+/* 54 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4230,7 +4314,7 @@ let {
     eventMapHook
 } = __webpack_require__(13);
 
-let applyAttibutes = __webpack_require__(58);
+let applyAttibutes = __webpack_require__(59);
 
 let replaceDirectly = (node, newNode) => {
     let parent = node.parentNode;
@@ -4344,11 +4428,11 @@ module.exports = (node, newNode) => {
 
 
 /***/ }),
-/* 54 */
+/* 55 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var rng = __webpack_require__(55);
-var bytesToUuid = __webpack_require__(57);
+var rng = __webpack_require__(56);
+var bytesToUuid = __webpack_require__(58);
 
 function v4(options, buf, offset) {
   var i = buf && offset || 0;
@@ -4379,7 +4463,7 @@ module.exports = v4;
 
 
 /***/ }),
-/* 55 */
+/* 56 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global) {// Unique ID creation requires a high quality random # generator.  In the
@@ -4416,10 +4500,10 @@ if (!rng) {
 
 module.exports = rng;
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(56)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(57)))
 
 /***/ }),
-/* 56 */
+/* 57 */
 /***/ (function(module, exports) {
 
 var g;
@@ -4446,7 +4530,7 @@ module.exports = g;
 
 
 /***/ }),
-/* 57 */
+/* 58 */
 /***/ (function(module, exports) {
 
 /**
@@ -4475,7 +4559,7 @@ module.exports = bytesToUuid;
 
 
 /***/ }),
-/* 58 */
+/* 59 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4522,7 +4606,7 @@ module.exports = applyAttibutes;
 
 
 /***/ }),
-/* 59 */
+/* 60 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4569,7 +4653,7 @@ module.exports = {
 
 
 /***/ }),
-/* 60 */
+/* 61 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4725,7 +4809,7 @@ let getGlobalEventTypeId = (type) => `${globalEventTypePrefix}${type}`;
 
 
 /***/ }),
-/* 61 */
+/* 62 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4781,7 +4865,7 @@ module.exports = (...args) => {
 
 
 /***/ }),
-/* 62 */
+/* 63 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4933,7 +5017,7 @@ module.exports = {
 
 
 /***/ }),
-/* 63 */
+/* 64 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5030,7 +5114,7 @@ module.exports = (classTable) => {
 
 
 /***/ }),
-/* 64 */
+/* 65 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5129,7 +5213,7 @@ module.exports = {
 
 
 /***/ }),
-/* 65 */
+/* 66 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5137,7 +5221,7 @@ module.exports = {
 
 let {
     noticeProgress
-} = __webpack_require__(66);
+} = __webpack_require__(67);
 let {
     Signal
 } = __webpack_require__(4);
@@ -5174,7 +5258,7 @@ module.exports = {
 
 
 /***/ }),
-/* 66 */
+/* 67 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5204,7 +5288,7 @@ module.exports = {
 
 
 /***/ }),
-/* 67 */
+/* 68 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5311,7 +5395,7 @@ module.exports = {
 
 
 /***/ }),
-/* 68 */
+/* 69 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5384,7 +5468,7 @@ module.exports = lumineView(({
 
 
 /***/ }),
-/* 69 */
+/* 70 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5467,7 +5551,7 @@ module.exports = lumineView(({
 
 
 /***/ }),
-/* 70 */
+/* 71 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5525,7 +5609,7 @@ module.exports = lumineView(({
 
 
 /***/ }),
-/* 71 */
+/* 72 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5578,7 +5662,7 @@ module.exports = lumineView(({
 
 
 /***/ }),
-/* 72 */
+/* 73 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5630,7 +5714,7 @@ module.exports = lumineView(({
 
 
 /***/ }),
-/* 73 */
+/* 74 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5639,9 +5723,9 @@ module.exports = lumineView(({
 let n = __webpack_require__(7);
 let lumineView = __webpack_require__(2);
 
-let TextLoading = __webpack_require__(74);
-let PageMask = __webpack_require__(75);
-let Empty = __webpack_require__(77);
+let TextLoading = __webpack_require__(75);
+let PageMask = __webpack_require__(76);
+let Empty = __webpack_require__(78);
 
 module.exports = lumineView(({
     props,
@@ -5668,7 +5752,7 @@ module.exports = lumineView(({
 
 
 /***/ }),
-/* 74 */
+/* 75 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5724,13 +5808,13 @@ module.exports = lumineView(({
 
 
 /***/ }),
-/* 75 */
+/* 76 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-let FullWindow = __webpack_require__(76);
+let FullWindow = __webpack_require__(77);
 let lumineView = __webpack_require__(2);
 let n = __webpack_require__(7);
 
@@ -5753,7 +5837,7 @@ module.exports = lumineView(({
 
 
 /***/ }),
-/* 76 */
+/* 77 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5784,7 +5868,7 @@ module.exports = lumineView(({
 
 
 /***/ }),
-/* 77 */
+/* 78 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5804,7 +5888,7 @@ module.exports = lumineView(() => {
 
 
 /***/ }),
-/* 78 */
+/* 79 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5863,41 +5947,236 @@ module.exports = lumineView(({
 
 
 /***/ }),
-/* 79 */
+/* 80 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-let requestor = (apiPath = '/api/pfc') => (pfcCode) => {
-    return new Promise((resolve, reject) => {
-        let xhr = new XMLHttpRequest();
+let apiStub = __webpack_require__(81);
+let pfcApis = __webpack_require__(82);
 
-        xhr.onreadystatechange = () => {
-            if (xhr.readyState === XMLHttpRequest.DONE) {
-                if (xhr.status === 200) {
-                    let {
-                        errno,
-                        errMsg,
-                        data
-                    } = JSON.parse(xhr.responseText);
-                    if (errno === 0) {
-                        resolve(data);
-                    } else {
-                        reject(new Error((errMsg.split(':')[1] || '').trim()));
-                    }
-                } else {
-                    reject(new Error(`status code is ${xhr.status}`));
+module.exports = pfcApis('/api/pfc', apiStub);
+
+
+/***/ }),
+/* 81 */
+/***/ (function(module, exports) {
+
+module.exports = {
+    loadViewFile: {
+        type: 'function',
+        validateParamItem: (paramValue, index) => {
+            if (index === 0) {
+                if (!paramValue) {
+                    throw new Error('view file can not be empty!');
                 }
             }
-        };
-
-        xhr.open('post', apiPath);
-        xhr.send(pfcCode);
-    });
+        }
+    }
 };
 
-module.exports = requestor;
+
+/***/ }),
+/* 82 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+let stubAsApis = __webpack_require__(83);
+let pfcRequestor = __webpack_require__(25);
+
+module.exports = (apiPath, stub) => {
+    let pfcRequest = pfcRequestor(apiPath);
+    let apis = stubAsApis(stub);
+
+    let apiMap = {};
+
+    for (let name in apis) {
+        let api = apis[name];
+        if (typeof api === 'function') {
+            apiMap[name] = (...params) => {
+                let lazy = () => {
+                    // resolve params first
+                    let paramValues = [];
+                    for (let i = 0; i < params.length; i++) {
+                        let param = params[i];
+                        if (isLazyFun(param)) {
+                            paramValues.push(param());
+                        } else {
+                            paramValues.push(param);
+                        }
+                    }
+
+                    return api(...paramValues);
+                };
+
+                lazy.tag = 'lazy';
+
+                return lazy;
+            };
+        } else {
+            apiMap[name] = api;
+        }
+    }
+
+    let runApi = (exp) => {
+        try {
+            if (isLazyFun(exp)) {
+                exp = exp();
+            }
+            return pfcRequest(exp.code);
+        } catch (err) {
+            return Promise.reject(err);
+        }
+    };
+
+    return {
+        apiMap,
+        runApi
+    };
+};
+
+let isLazyFun = (f) => {
+    return typeof f === 'function' && f.tag === 'lazy';
+};
+
+
+/***/ }),
+/* 83 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+let {
+    isObject,
+    isFunction
+} = __webpack_require__(84);
+
+/**
+ * we got stub and use it as apis to ccontruct pfc code
+ */
+
+module.exports = (variableStub = {}) => {
+    let apiMap = {};
+
+    for (let name in variableStub) {
+        let stub = variableStub[name];
+        if (stub.type === 'function') {
+            apiMap[name] = (...params) => callStubFunction(name, params, variableStub[name] || {});
+        } else {
+            apiMap[name] = callStubVariable(name);
+        }
+    }
+
+    return apiMap;
+};
+
+let callStubVariable = (variable) => {
+    return {
+        code: `${variable}`,
+        type: 'variable'
+    };
+};
+
+let callStubFunction = (variable, params, stub) => {
+    let code = `${variable}(`;
+
+    let fullAtoms = true,
+        paramValues = [];
+
+    for (let i = 0; i < params.length; i++) {
+        let param = params[i];
+        if (isObject(param) && param.type === 'function') {
+            code += param.code;
+            fullAtoms = false;
+        } else if (isObject(param) && param.type === 'variable') {
+            code += param.code;
+            fullAtoms = false;
+        } else {
+            paramValues.push(param);
+            // validate atom param
+            if (isFunction(stub.validateParamItem)) {
+                stub.validateParamItem(param, i);
+            }
+            code += serializeAtom(param);
+        }
+
+        if (i < params.length - 1) {
+            code += ',';
+        }
+    }
+
+    if (fullAtoms && isFunction(stub.validateParams)) {
+        stub.validateParams(paramValues);
+    }
+
+    code += ')';
+
+    return {
+        type: 'function',
+        code
+    };
+};
+
+let serializeAtom = (atom) => {
+    if (typeof atom === 'string') {
+        return `"${atom}"`;
+    } else if (atom === null) {
+        return 'null';
+    } else if (atom === true) {
+        return 'true';
+    } else if (atom === false) {
+        return 'false';
+    } else if (typeof atom === 'number') {
+        return atom + '';
+    } else {
+        throw new Error(`unexpected atom type in pfc, atom is ${atom}.`);
+    }
+};
+
+
+/***/ }),
+/* 84 */
+/***/ (function(module, exports) {
+
+// ignore whitespace
+let processTokens = (rawTokens) => {
+    let tokens = [];
+    for (let i = 0; i < rawTokens.length; i++) {
+        let {
+            text, tokenType
+        } = rawTokens[i];
+
+        let name = tokenType.name;
+
+        if (name !== 'whitespace') { // ignore white space
+            tokens.push({
+                text,
+                name
+            });
+        }
+    }
+
+    return tokens;
+};
+
+let getProductionId = (production) => {
+    return `${production[0]} := ${production[1].join(' ')}`;
+};
+
+let isFunction = (v) => typeof v === 'function';
+
+let isObject = (v) => v && typeof v === 'object';
+
+module.exports = {
+    processTokens,
+    getProductionId,
+    isFunction,
+    isObject
+};
 
 
 /***/ })

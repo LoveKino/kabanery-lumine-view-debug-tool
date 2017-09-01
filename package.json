@@ -19,7 +19,7 @@
   "author": "ddchen",
   "license": "MIT",
   "dependencies": {
-    "crude-server": "0.0.7",
+    "crude-server": "0.0.10",
     "del": "^3.0.0",
     "es6-promisify": "^5.0.0",
     "kabanery": "^0.2.7",
@@ -28,5 +28,8 @@
     "uuid": "^3.1.0",
     "webpack": "^3.5.5",
     "yargs": "^8.0.2"
+  },
+  "devDependencies": {
+    "mocha": "^3.5.0"
   }
 }

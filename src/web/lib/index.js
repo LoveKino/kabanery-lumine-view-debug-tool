@@ -7,7 +7,10 @@ let {
 } = require('kabanery');
 
 let debugPage = require('./page/debugPage');
-let pfcRequestor = require('crude-server/webLib/pfcRequestor');
+let {
+    apiMap,
+    runApi
+} = require('./store');
 
 let {
     router,
@@ -18,13 +21,20 @@ mount(n('div id="pager"'), document.body); // pager as contauner
 
 let {
     forward
-} = router(queryPager({
-    'debugPage': {
-        title: 'debug veiw',
-        render: debugPage
+} = router(
+    // pages
+    queryPager({
+        'debugPage': {
+            title: 'debug veiw',
+            render: debugPage
+        }
+    }, 'debugPage'),
+
+    // page env
+    {
+        apiMap,
+        runApi
     }
-}, 'debugPage'), {
-    pfcRequest: pfcRequestor()
-});
+);
 
 forward(window.location.href);

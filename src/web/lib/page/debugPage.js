@@ -25,7 +25,8 @@ let PageLoading = require('kabanery-lumine/lib/view/loading/pageLoading');
 let Notice = require('kabanery-lumine/lib/view/notice/notice');
 
 const ACTIONS = {
-    DO_LOAD_VIEW_FILE: 'doLoadViewFile'
+    DO_LOAD_VIEW_FILE: 'doLoadViewFile',
+    DO_SAVE_CASE: 'doSaveCase'
 };
 
 // TODO fix multiple update problem
@@ -39,10 +40,12 @@ let PageView = lumineView(({
             testViewErr = null;
 
         try {
-            if (clear) {
-                clear();
+            if (props.viewDefinitionCode) {
+                if (clear) {
+                    clear();
+                }
+                testView = eval(`${props.viewDefinitionCode};clear = clearEvents;${props.viewDebugCode}`);
             }
-            testView = eval(`${props.viewDefinitionCode};clear = clearEvents;${props.viewDebugCode}`);
         } catch (err) {
             testViewErr = err.toString();
         }
@@ -80,18 +83,27 @@ let PageView = lumineView(({
             ]),
 
             n(Hn, {
-                mode: 'percentage'
+                mode: 'percentage',
+                pers: [1, 4, 4]
             }, [
-                n(Textarea, syncBindWithKeyMap(ctx, {
-                    'viewDebugCode': 'value'
-                }, {
-                    autoUpdate: true,
-                    bindedProps: {
-                        style: {
-                            width: '100%'
+                n('div', 'case list'),
+
+                n(Vn, [
+                    n(Textarea, syncBindWithKeyMap(ctx, {
+                        'viewDebugCode': 'value'
+                    }, {
+                        autoUpdate: true,
+                        bindedProps: {
+                            style: {
+                                width: '100%'
+                            }
                         }
-                    }
-                })),
+                    })),
+
+                    n(Button, {
+                        onsignal: onSignalType('click', deliver(ctx, ACTIONS.DO_SAVE_CASE))
+                    }, 'save as case')
+                ]),
 
                 n('div', [
                     testViewErr || testView
@@ -112,14 +124,25 @@ let PageView = lumineView(({
 });
 
 module.exports = ({
-    pfcRequest
+    apiMap,
+    runApi
 }) => {
     let pageView = n(PageView, wrapPagePropsWithStore({
         onsignal: (signal, data, ctx) => {
             if (signal.type === ACTIONS.DO_LOAD_VIEW_FILE) {
+                loadViewFileHandler(ctx);
+            } else if (signal.type === ACTIONS.DO_SAVE_CASE) {
                 if (data.props.viewPath) {
-                    // do load view file
-                    loadViewFileHandler(data.props.viewPath);
+                    if (data.props.testPath) {
+                        //
+                        saveCaseHandler(ctx);
+                    } else {
+                        // notice
+                        ctx.update([
+                            ['props.showNotice', true],
+                            ['props.noticeText', 'empty test path!']
+                        ]);
+                    }
                 } else {
                     // notice
                     ctx.update([
@@ -133,14 +156,26 @@ module.exports = ({
         blackList: ['showLoading', 'viewDefinitionCode', 'showNotice', 'noticeText', 'theme']
     }));
 
-    let loadViewFileHandler = loadingNoticeProgress((viewPath) => {
-        let props = pageView.ctx.getData().props;
+    let loadingPromise = (fn) => {
+        return loadingNoticeProgress(fn, pageView.ctx, 'props.showLoading', 'props.showNotice', 'props.noticeText');
+    };
+
+    let saveCaseHandler = loadingPromise((ctx) => {
+        let props = ctx.getData().props;
+        let viewPath = props.viewPath;
+        let testPath = props.testPath;
+        return runApi(apiMap.addCase(viewPath, testPath));
+    });
+
+    let loadViewFileHandler = loadingPromise((ctx) => {
+        let props = ctx.getData().props;
+        let viewPath = props.viewPath;
         let testPath = props.testPath;
         if (!testPath) {
             testPath = getDefaultTestDir(viewPath);
         }
 
-        return pfcRequest(`loadViewFile("${viewPath}")`).then((data) => {
+        return runApi(apiMap.loadViewFile(viewPath)).then((data) => {
             let viewDefinitionCode = `let {TestedView, clearEvents} = ${data.viewCode}`;
             let viewDebugCode = props.viewDebugCode;
             if (viewDebugCode === null) {
@@ -157,7 +192,7 @@ module.exports = ({
 
     // loading data at first
     if (pageView.ctx.getData().props.viewPath) {
-        loadViewFileHandler(pageView.ctx.getData().props.viewPath);
+        loadViewFileHandler(pageView.ctx);
     }
 
     return pageView;
@@ -165,7 +200,8 @@ module.exports = ({
 
 let getDefaultTestDir = (jsPath) => {
     let parts = jsPath.split('/');
-    parts.pop();
+    let name = parts.pop();
     parts.push('__test__');
+    parts.push(name);
     return parts.join('/');
 };
