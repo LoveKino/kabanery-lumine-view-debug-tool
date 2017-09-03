@@ -9,13 +9,6 @@ let {
     deliver,
     onSignalType
 } = require('kabanery-lumine/lib/util/signal');
-let {
-    loadingNoticeProgress
-} = require('kabanery-lumine/lib/view/loading/loadingApply');
-let {
-    wrapPagePropsWithStore
-} = require('kabanery-lumine/lib/store/storeProps');
-
 let Vn = require('kabanery-lumine/lib/view/layout/vn');
 let Hn = require('kabanery-lumine/lib/view/layout/hn');
 let Input = require('kabanery-lumine/lib/view/input/input');
@@ -24,13 +17,12 @@ let Button = require('kabanery-lumine/lib/view/button/button');
 let PageLoading = require('kabanery-lumine/lib/view/loading/pageLoading');
 let Notice = require('kabanery-lumine/lib/view/notice/notice');
 
-const ACTIONS = {
-    DO_LOAD_VIEW_FILE: 'doLoadViewFile',
-    DO_SAVE_CASE: 'doSaveCase'
-};
+const {
+    DO_LOAD_VIEW_FILE,
+    DO_SAVE_CASE
+} = require('../signals');
 
-// TODO fix multiple update problem
-let PageView = lumineView(({
+module.exports = lumineView(({
     props
 }, ctx) => {
     let clear = null; // cache for last clearEvents interface
@@ -77,7 +69,7 @@ let PageView = lumineView(({
                         }
                     })),
                     n(Button, {
-                        onsignal: onSignalType('click', deliver(ctx, ACTIONS.DO_LOAD_VIEW_FILE))
+                        onsignal: onSignalType('click', deliver(ctx, DO_LOAD_VIEW_FILE))
                     }, 'load')
                 ])
             ]),
@@ -101,7 +93,7 @@ let PageView = lumineView(({
                     })),
 
                     n(Button, {
-                        onsignal: onSignalType('click', deliver(ctx, ACTIONS.DO_SAVE_CASE))
+                        onsignal: onSignalType('click', deliver(ctx, DO_SAVE_CASE))
                     }, 'save as case')
                 ]),
 
@@ -122,86 +114,3 @@ let PageView = lumineView(({
         noticeText: ''
     }
 });
-
-module.exports = ({
-    apiMap,
-    runApi
-}) => {
-    let pageView = n(PageView, wrapPagePropsWithStore({
-        onsignal: (signal, data, ctx) => {
-            if (signal.type === ACTIONS.DO_LOAD_VIEW_FILE) {
-                loadViewFileHandler(ctx);
-            } else if (signal.type === ACTIONS.DO_SAVE_CASE) {
-                if (data.props.viewPath) {
-                    if (data.props.testPath) {
-                        //
-                        saveCaseHandler(ctx);
-                    } else {
-                        // notice
-                        ctx.update([
-                            ['props.showNotice', true],
-                            ['props.noticeText', 'empty test path!']
-                        ]);
-                    }
-                } else {
-                    // notice
-                    ctx.update([
-                        ['props.showNotice', true],
-                        ['props.noticeText', 'empty view path!']
-                    ]);
-                }
-            }
-        }
-    }, {
-        blackList: ['showLoading', 'viewDefinitionCode', 'showNotice', 'noticeText', 'theme']
-    }));
-
-    let loadingPromise = (fn) => {
-        return loadingNoticeProgress(fn, pageView.ctx, 'props.showLoading', 'props.showNotice', 'props.noticeText');
-    };
-
-    let saveCaseHandler = loadingPromise((ctx) => {
-        let props = ctx.getData().props;
-        let viewPath = props.viewPath;
-        let testPath = props.testPath;
-        return runApi(apiMap.addCase(viewPath, testPath));
-    });
-
-    let loadViewFileHandler = loadingPromise((ctx) => {
-        let props = ctx.getData().props;
-        let viewPath = props.viewPath;
-        let testPath = props.testPath;
-        if (!testPath) {
-            testPath = getDefaultTestDir(viewPath);
-        }
-
-        return runApi(apiMap.loadViewFile(viewPath)).then((data) => {
-            let viewDefinitionCode = `let {TestedView, clearEvents} = ${data.viewCode}`;
-            let viewDebugCode = props.viewDebugCode;
-            if (viewDebugCode === null) {
-                viewDebugCode = 'n(TestedView, {}, [])';
-            }
-
-            return pageView.ctx.updateWithNotify(null, [
-                ['props.viewDefinitionCode', viewDefinitionCode],
-                ['props.viewDebugCode', viewDebugCode],
-                ['props.testPath', testPath]
-            ]);
-        });
-    }, pageView.ctx, 'props.showLoading', 'props.showNotice', 'props.noticeText');
-
-    // loading data at first
-    if (pageView.ctx.getData().props.viewPath) {
-        loadViewFileHandler(pageView.ctx);
-    }
-
-    return pageView;
-};
-
-let getDefaultTestDir = (jsPath) => {
-    let parts = jsPath.split('/');
-    let name = parts.pop();
-    parts.push('__test__');
-    parts.push(name);
-    return parts.join('/');
-};

@@ -2,9 +2,9 @@
 
 let simpleServer = require('crude-server/lib/server/simpleServer');
 let loadViewFile = require('./business/loadViewFile');
-let addCase = require('./business/addCase');
-let localCaseDirs = require('./business/localCaseDirs');
 let apiStub = require('../common/apiStub');
+let commonApis = require('crude-server/lib/server/context/common');
+let store = require('./business/store');
 
 module.exports = ({
     indexHtmlPath,
@@ -15,9 +15,8 @@ module.exports = ({
         assetOutterDir,
         pfcContexter: () => {
             return Object.assign({
-                loadViewFile,
-                addCase
-            }, localCaseDirs);
+                loadViewFile
+            }, commonApis, store);
         },
         pfcVariableStub: apiStub
     });

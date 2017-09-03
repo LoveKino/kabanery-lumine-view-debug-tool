@@ -1,40 +1,21 @@
 'use strict';
 
-let spa = require('kabanery-spa');
 let {
-    n,
-    mount
-} = require('kabanery');
+    SPA
+} = require('kabanery-lumine/lib/page/flowPfcSPA');
+let apiStub = require('../../common/apiStub');
+let pageSignalActionMap = require('./pageSignalActionMap');
+let pageViewMap = require('./page');
 
-let debugPage = require('./page/debugPage');
-let {
-    apiMap,
-    runApi
-} = require('./store');
-
-let {
-    router,
-    queryPager
-} = spa;
-
-mount(n('div id="pager"'), document.body); // pager as contauner
-
-let {
-    forward
-} = router(
-    // pages
-    queryPager({
-        'debugPage': {
-            title: 'debug veiw',
-            render: debugPage
+SPA({
+    apiStub,
+    pageViewMap,
+    pageSignalActionMap,
+    pageOptionsMap: {
+        debugPage: {
+            localStateStore: true,
+            localStateStoreBlackList: ['showLoading', 'viewDefinitionCode', 'showNotice', 'noticeText', 'theme']
         }
-    }, 'debugPage'),
-
-    // page env
-    {
-        apiMap,
-        runApi
-    }
-);
-
-forward(window.location.href);
+    },
+    defaultPage: 'debugPage'
+});

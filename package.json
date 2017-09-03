@@ -19,11 +19,11 @@
   "author": "ddchen",
   "license": "MIT",
   "dependencies": {
-    "crude-server": "0.0.10",
+    "crude-server": "0.0.11",
     "del": "^3.0.0",
     "es6-promisify": "^5.0.0",
     "kabanery": "^0.2.7",
-    "kabanery-lumine": "0.0.21",
+    "kabanery-lumine": "0.0.29",
     "kabanery-spa": "0.0.16",
     "uuid": "^3.1.0",
     "webpack": "^3.5.5",
