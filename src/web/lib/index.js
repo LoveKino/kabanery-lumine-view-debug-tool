@@ -14,7 +14,8 @@ SPA({
     pageOptionsMap: {
         debugPage: {
             localStateStore: true,
-            localStateStoreBlackList: ['showLoading', 'viewDefinitionCode', 'showNotice', 'noticeText', 'theme']
+            // TODO whiteList
+            localStateStoreBlackList: ['showLoading', 'viewDefinitionCode', 'showNotice', 'noticeText', 'theme', 'caseNameDialog']
         }
     },
     defaultPage: 'debugPage'

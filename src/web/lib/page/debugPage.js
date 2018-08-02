@@ -16,6 +16,7 @@ let Textarea = require('kabanery-lumine/lib/view/input/textarea');
 let Button = require('kabanery-lumine/lib/view/button/button');
 let PageLoading = require('kabanery-lumine/lib/view/loading/pageLoading');
 let Notice = require('kabanery-lumine/lib/view/notice/notice');
+let InputDialog = require('kabanery-lumine/lib/view/modal/inputDialog');
 
 const {
     DO_LOAD_VIEW_FILE,
@@ -43,9 +44,20 @@ module.exports = lumineView(({
         }
 
         return n(Vn, [
+            n(InputDialog, syncBindWithKeyMap(ctx, {
+                'caseNameDialog.show': 'show',
+                'caseNameDialog.caseName': 'text'
+            }, {
+                bindedProps: {
+                    title: 'case name',
+                    autoHide: false
+                }
+            })),
+
             n(PageLoading, syncBindWithKeyMap(ctx, {
                 'showLoading': 'show'
             })),
+
             n(Notice, syncBindWithKeyMap(ctx, {
                 'showNotice': 'show',
                 'noticeText': 'text'
@@ -78,7 +90,14 @@ module.exports = lumineView(({
                 mode: 'percentage',
                 pers: [1, 4, 4]
             }, [
-                n('div', 'case list'),
+                n('div', [
+                    n('h3', 'case list'),
+                    n('div', getCaseList(props.cases).map(({
+                        value
+                    }) => {
+                        return n('div', value);
+                    }))
+                ]),
 
                 n(Vn, [
                     n(Textarea, syncBindWithKeyMap(ctx, {
@@ -109,8 +128,26 @@ module.exports = lumineView(({
         testPath: '',
         viewDebugCode: null,
         viewDefinitionCode: '',
+        cases: {},
+
         showLoading: false,
+
         showNotice: false,
-        noticeText: ''
+        noticeText: '',
+
+        caseNameDialog: {
+            caseName: '',
+            show: false
+        }
     }
 });
+
+let getCaseList = (cases) => {
+    let keys = Object.keys(cases).sort();
+    return keys.map((key) => {
+        return {
+            key,
+            value: cases[key]
+        };
+    });
+};

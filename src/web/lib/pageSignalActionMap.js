@@ -12,11 +12,16 @@ let getDefaultTestFile = (jsPath) => {
     return parts.join('/');
 };
 
+// TODO combo requests
 module.exports = {
     debugPage: {
         'kabanery_page_render': [{
             type: 'updateState',
             content: '.viewState.props.showLoading = true'
+        }, {
+            type: 'sendRequest',
+            content: 'getCaseList(.viewState.props.testPath)',
+            response: '.viewState.props.cases=.response'
         }, {
             type: 'sendRequest',
             content: 'loadViewFile(.viewState.props.viewPath)',
